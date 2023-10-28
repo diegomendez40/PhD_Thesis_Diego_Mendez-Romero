@@ -4,7 +4,7 @@
 
 ## Getting Started
 
-For an explanation of Neural-Kalman schemes, see the main pdf, PhD_Thesis_Diego_Méndez_Romero_v1.pdf.
+For an explanation of Neural-Kalman schemes, see the main pdf, PhD_Thesis_Diego_Méndez_Romero_v1.pdf, and the accompanying viva slides, "Neural-Kalman Schemes for Channel Tracking and Learning_v0.074.pptx".
 
 ## Repository Structure
 
