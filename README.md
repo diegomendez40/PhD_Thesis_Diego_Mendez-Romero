@@ -16,3 +16,10 @@ Méndez-Romero, D. and Fernández-Getino García, M. J. (2018). Simpler Multipat
 67(11):10752-10759. DOI: 10.1109/TVT.2018.2868445
 
 Results: A computationally inexpensive, threshold-based abrupt-change detector called Simplified Maximum A Posteriori (SMAP) is presented. Simulations show this estimator greatly reduces channel tracking error in the target SNR range at a very small computational cost, thus outperforming previously known systems.
+
+### Paper 02 - Vehicular Kalman trackers
+
+Méndez-Romero, D. and Fernández-Getino García, M. J. (2020). Death/Birth and SNR Detection for Vehicular Kalman Channel Trackers. In 2020 IEEE 20th Mediterranean Electrotechnical Conference (MELECON) [16-18 June 2020], pages 104-108, Palermo, Italy. IEEE. DOI: 10.1109/MELECON48756.2020.9140497
+
+Results: This paper considers combined death/birth and SNR detection when SNR is dynamical and may drift. Simulation results compared different schemes combining SNR detection and SMAP and suggest that SMAP, while being robust to SNR drift, benefits from an accurate SNR detection.
+
