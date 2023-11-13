@@ -1,0 +1,399 @@
+\documentclass[conference]{IEEEtran}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+\begin{document}
+
+\title{Death/Birth and SNR Detection for Vehicular Kalman Channel Trackers\\
+\thanks{This work has been partially supported by the Spanish National Project
+TERESA-ADA, under grant TEC2017-90093-C3-2-R, funded by
+(MINECO/AEI/FEDER, UE).}
+}
+
+\author{\IEEEauthorblockN{Diego M\'endez-Romero}
+\IEEEauthorblockA{\textit{Department of Signal Theory and Communications} \\
+\textit{Universidad Carlos III de Madrid}\\
+Madrid, Spain \\
+dmendez@tsc.uc3m.es}
+\and
+\IEEEauthorblockN{M. Julia Fern\'andez-Getino Garc\'ia}
+\IEEEauthorblockA{\textit{Department of Signal Theory and Communications} \\
+\textit{Universidad Carlos III de Madrid}\\
+Madrid, Spain \\
+mjulia@tsc.uc3m.es}
+}
+
+\maketitle
+
+\begin{abstract}
+Wireless communication demand is increasing requirements due to expected smart mobility as well as modern vehicular technologies, such as Unmanned Air Vehicles (UAVs) or High-Speed Rail (HSR). In the latter scenario, high mobility through different physical environments, such as from viaducts to cuttings or tunnels, results in a fast variation of the multipath structure, giving rise to the phenomenon of birth-death of taps. To exploit the temporal correlation of each tap, however, a Kalman filter (KF) could be used; but KF's performance degrades catastrophically unless tap birth/death can be synchronically detected. To address this issue, several solutions based on particle filtering have been proposed, albeit with a prohibitive complexity. More recently, a Simplified Maximum A Posteriori (SMAP) algorithm for tap birth/death detection has been developed for the case where there is no signal-to-noise ratio (SNR) variation. With a similar purpose in mind, this paper develops a theoretical framework to understand death/birth detection when SNR is dynamical and may drift. This paper also analyzes how different quasi-ideal SNR detectors affect the SMAP algorithm's performance.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Kalman, SNR, SMAP, OFDM, vehicular
+\end{IEEEkeywords}
+
+\section{Introduction}
+The incessant growth in wireless communication demand, including new scenarios such as high-speed rail (HSR) \cite{GUO17}, is increasing requirements for communication technologies. Orthogonal Frequency-Division Multiplexing (OFDM) has become the base for many of them, including Long-Term Evolution (LTE) systems, and it has also been put forward as a prime candidate in broadband data networks for high-mobility applications \cite{SHE17}. OFDM's advantages include frequency diversity and a manageable complexity \cite{TSE05}. Therefore, in the wake of the 5G mobile generation and its current deployment in several countries, OFDM has been considered in the first release of 5G New Radio (5G-NR) \cite{DAH18}.
+
+Vehicular applications usually require the tracking of time-variant channels. Kalman filtering (KF) and its many adaptions and extensions \cite{GRE01} have been proposed for such task. KF's advantage is its optimality as an estimator for linear problems: it minimizes the mean-squared estimation error for a linear stochastic system using noisy linear sensors. Thus, when a channel tracking problem can be modeled as approximately linear, the KF is the optimal solution to the linear problem. However, this approximation is not always valid.
+
+More powerful channel tracking techniques will be demanded as mobile communications spread into more dynamic channels, such as those of high-speed railways \cite{HE16} in rugged terrain \cite{CHE15} or Unmanned Aerial Vehicles (UAVs) \cite{MAT15} in suburban/hilly terrain environments \cite{MAT16}. In these situations, random intermittent multipath components (MPCs) appear, rendering the linear approximation for tap dynamics invalid: phenomena such as the appearance of a new tap of the disappearance of a previous tap \cite{MAH17} are catastrophic for estimation performance whan KF-based techniques are used.
+
+Tap birth-death conditions can be reconciled with linearity during non-birth, non-death periods by using the framework of Random Set Theory (RST) models. This makes it possible to use powerful RST-based estimators. In \cite{ANG07}, \cite{ANG09}, three such possible estimators were compared. However, they required an impracticable computational cost for any practical applications. A simpler algorithm was derived in \cite{MEN18}, the so-called Simplified Maximum a Posteriori (SMAP) death/birth detector, based on three dynamically-thresholded heuristics. However, both proposals failed to consider a scenario where SNR levels drifted abruptly. This paper extends the RST framework to combined death/birth and SNR detection when SNR is dynamical and may drift. Additionally, it analyzes how different quasi-ideal SNR detectors affect the SMAP algorithm's performance.
+
+This paper is organized as follows. In Section {\scshape ii}, the OFDM system model is formally stated. In Section {\scshape iii}, a novel RST model for abrupt changes in the multipath channel (including SNR drift) is introduced, as well as Quasi-Ideal SNR Detectors (QISDs) that can work with SMAP detectors. Section {\scshape iv} describes the SMAP algorithm and some optimization issues for SMAP parameters in this new context. Finally, the simulated results are shown in Section {\scshape v} and conclusions are extracted in Section {\scshape vi}.
+
+\section{System Model}
+
+$N$ orthogonal subcarriers are included in the OFDM system, which transmits OFDM symbols with a time duration $T_{sy}$ and a sampling
+interval $T_{sa}$. It is assumed no out-of-band interference is present.
+Each subcarrier is used for a dual purpose: pilot symbols and data transmission. Data is bundled in data blocks of a fixed length, $M_{inf}$.
+
+Channel estimation is enabled though the first $K$ sent symbols: these are pilot symbols used to estimate the channel. Estimation is made by averaging over $K$. The receiver will use the channel estimation so acquired for all $M_{inf}$ subsequent data symbols. Channel changes will be both assumed to occur and be tracked only once every estimation period $T_{est}=(K+M_{inf})\cdot T_{sy}$. A guard time $T_{CP}$ (cyclic prefix) is reserved between OFDM symbol transmissions (thus, $T_{sy}=NT_{sa}+T_{CP}$) and the multipath delay spread is assumed smaller than $T_{CP}$.
+
+The pilot symbol index in the $p$th estimation period will be symbolized by $k=\{1,...,K\}$. The gain will be assumed constant for the duration of the estimation period. Thus, the received signal can be given in vector form as:
+
+\begin{equation}
+\mathbf{y}_{p,k}=\mathbf{D}_{p,k}\mathbf{F}_{p}\mathbf{h}_{p}+\mathbf{z}_{p,k}
+\end{equation}
+
+where $\mathbf{y}_{p,k}=[y_{p,1,k},...,y_{p,N,k}]^{T}$, each $y_{p,n,k}$
+(for $n=\{1,...,N\}$) is the $n$th subcarrier observed
+sample at time $t_{p,k}=(p-1)\cdot T_{est}+(k-1)\cdot T_{sy}$;
+$\mathbf{D}_{p,k}=diag(d_{p,1,k},...,d_{p,N,k}),$with $d_{p,n,k}$
+the pilot-aided training data on the $n$th pilot subchannel at time $t_{p,k}$;
+$\mathbf{z}_{p,k}=[z_{p,1,k},...,z_{p,N,k}]$, where $z_{p,n,k}$ is the zero-mean complex Gaussian additive noise with variance $\sigma_{z}^{2}$; and
+
+\begin{equation}
+\{\mathbf{F}_{p}\}_{n,l}=e^{-j2\pi n\cdot\frac{\tau_{l}(pT_{est})}{NT_{sa}}}
+\end{equation}
+
+where $\tau_{l}(pT_{est})$ is the delay of the $l$th path during
+the $p$th interval; and, finally, $\mathbf{h}_{p}=[h_{1}(pT_{est}),...,h_{L(pT_{est})}(pT_{est})]^{T}$, where $h_{l}(pT_{est})$ is the complex gain of the $l$th path at time $p$, $l=\{1,...,L(pT_{est})\}$, and $L(pT_{est})$ is the number of active paths. 
+
+Since there are $K$ pilot symbols just before each data block, the received signal (including all $K$ received pilot symbols) will be the matrix $\mathbf{Y}_{p}=[\mathbf{y}_{p,1},...,\mathbf{y}_{p,K}]$.
+
+
+Channel tap dynamics will include the birth/death phenomenon. When active, tap gains will follow a Linear Gauss-Markov (LGM) model. If $a_{p}^{(l)}$ represents the $l$th tap gain at time $p$ assuming $l$th path
+is active, then the probability density function (pdf) for $a_{p}^{(l)}$ will be given by these equations:
+
+\begin{equation}
+f(a_{1}^{(l)})=\mathcal{N}(a_{1}^{(l)};0,\sigma_{h_{l}}^{2})\label{eq:GML1}
+\end{equation}
+
+\begin{equation}
+f(a_{p}^{(l)}|a_{p-1}^{(l)})=\mathcal{N}(a_{p}^{(l)};\lambda a_{p-1}^{(l)},(1-\lambda^{2})\sigma_{h_{l}}^{2})\label{eq:GML2}
+\end{equation}
+
+where $f(\cdot)$ represents a pdf, $\mathcal{N}(\cdot)$ signifies the normal distribution, $\sigma_{h_{l}}^{2}$ is the average energy of the $l$th tap and $\lambda$ is the time self-correlation for each non-zero tap gain. However, when the $l$th tap is dead (inactive), then $h_{l}(pT_{est})$=0. Each non-zero tap has a probability $P_{death}$ of dying (becoming
+zero-gain); each zero-gain tap has a probability $P_{birth}$ of being (re)born (i.e. changing its gain tobecoming non-zero-gain). When both probabilities are identical, they will be denoted by $P_{birth/death}$.
+SNR levels will not be assumed fixed. Two possible SNR levels (``low'' and ``high'') will be assumed to be possible. $P_{switch}$ denotes the probability of switching between them at any given estimation period.
+The problem under consideration can now be formulated as follows:
+given the observations (1), determine a causal estimator $\hat{\mathbf{h}}_{p}$ for $\mathbf{h}_{p}$, relying upon $\{\mathbf{Y}_{1:p}\}$. The desired solution would minimize Channel Tracking Mean Squared Error (CTMSE), defined as:
+
+\begin{equation}
+CTMSE\,\triangleq||\sum_{p}\hat{\mathbf{h}}_{p}-\mathbf{h}_{p}||_{2}^{2}\label{eq:CTMSE}
+\end{equation}
+
+\section{An RST model for abrupt SNR changes}
+
+Consider a Tapped-Delay-Line (TDL) channel model with $K_{max}$ possible, randomly alternating SNR levels and up to $L_{max}$ different equispaced\footnote{If path delays are not equispaced, the analysis is somewhat more complex,
+but equally feasible.} path delays. Let us thus assume that SNR may change
+during transmission between a finite number ($K_{max}$) of known levels. Then,
+the multipath channel can be denoted by the $\mathcal{H}_{p}^{(k,l)}$,
+the following singleton-or-empty random set:
+
+\begin{align}
+\mathcal{H}_{p}^{(k,l)} & =\begin{cases}
+\{\emptyset\} & if\,path\,(k,l)\,absent\\
+\{\mathbf{h}_{p}^{(k,l)}\}=\{[SNR_{p}^{(k)},l,a_{p}^{(l)}]^{T}\} & if\,path\,(k,l)\,present
+\end{cases}
+\end{align}
+
+where path $(k,l)$ means the $l$th path, under the condition that
+all active paths are subject to $SNR^{(k)}$ at
+time $p$; and $a_{p}^{(l)}$ is the $l$th multipath gain at time
+$p$. The multipath channel state at time $p$ is completely described
+by
+
+\begin{equation}
+\mathcal{H}_{p}=\bigcup_{k=1}^{K_{max}}\bigcup_{l=1}^{L_{max}}\mathcal{H}_{p}^{(k,l)}
+\end{equation}
+
+which is a random set on the hybrid space $\{1,...,K_{max}\}\times\{1,...,L_{max}\}\times\mathbb{C}$.
+Please notice that we can define the projections of $\mathcal{H}_{p}$
+onto $\{1,...,K_{max}\}$, onto $\{1,...,L{}_{max}\}$ and onto $\mathbb{C}$,
+respectively:
+
+\begin{equation}
+\pi(\mathcal{H}_{p})=\bigcup_{(k,l):\mathcal{H}_{p}^{(k,l)}\neq\emptyset}\{SNR_{p}^{(k)}\}
+\end{equation}
+
+\begin{equation}
+\pi'(\mathcal{H}_{p})=\bigcup_{k\in\pi(\mathcal{H}_{p}),l:\mathcal{H}_{p}^{(k,l)}\neq\emptyset}\{l\}
+\end{equation}
+
+\begin{equation}
+\pi''(\mathcal{H}_{p})=\bigcup_{k\in\pi(\mathcal{H}_{p}),l:\pi'(\mathcal{H}_{p})}\{a_{p}^{(l)}\}
+\end{equation}
+
+If $\mathcal{U}_{p}$ denotes the set of paths whose parameter SNR
+is unmodified from time $p-1$ to time $p$, i.e. $\pi(\mathcal{U}_{p})\subseteq\pi(\mathcal{H}_{p-1})$
+and $\mathcal{M}_{p}$ is the set of newly modified paths (i.e. $\pi(\mathcal{H}_{p-1})\cap\pi(\mathcal{M}_{p})=\emptyset$),
+we thus have
+
+\begin{equation}
+\mathcal{H}_{p}=\mathcal{U}_{p}\cup\mathcal{M}_{p}
+\end{equation}
+
+Similarly, we can define a set of surviving paths, $\mathcal{S}_{p}$,
+such that $\pi'(\mathcal{S}_{p})\subseteq\pi'(\mathcal{H}_{p-1})$,
+and a set of newly born paths $\mathcal{B}_{p}$ such that $\pi'(\mathcal{H}_{p-1})\cap\pi'(\mathcal{B}_{p})=\emptyset$.
+Thus,
+
+\begin{equation}
+\begin{gathered}
+\mathcal{H}_{p}=(\mathcal{U}_{p}\cup\mathcal{M}_{p})\cap(\mathcal{S}_{p}\cup\mathcal{B}_{p})=
+& =(\mathcal{U}_{p}\cap\mathcal{S}_{p})\cup(\mathcal{U}_{p}\cap\mathcal{B}_{p})\cup(\mathcal{M}_{p}\cap\mathcal{S}_{p})\cup(\mathcal{M}_{p}\cap\mathcal{B}_{p})
+\end{gathered}
+\end{equation}
+
+On the basis of this newly defined framework, a problem can be characterized
+by defining the probability of transition between the four joining
+subsets in (7).
+
+Please notice that if the probability of transition from $\mathcal{U}_{p}$
+to $\mathcal{M}_{p}$ is 0, the problem reduces to one where SNR and the probability of tap birth or death, $P_{birth/death}$, are constant, such as the one studied in {[}4{]}, solvable
+with a Rao-Blackwellized Particle Filter (RBPF). In the style of GMAP-III
+{[}4{]}, we hereby propose the following three-step estimator for
+the general problem:
+
+\begin{equation}
+\begin{cases}
+\widehat{\pi(\mathcal{H}_{p})}=arg\,max_{\mathcal{H}_{p}}\,f(\pi(\mathcal{H}_{p})|\mathcal{Y}_{1:p}),\\
+\widehat{\pi'(\mathcal{H}_{p})}=arg\,max_{\mathcal{H}_{p}}\,f(\pi'(\mathcal{H}_{p})|\mathcal{Y}_{1:p},\widehat{\pi(\mathcal{H}_{p})}),\\
+\tilde{\mathbf{h}_{p}}=\int_{\mathcal{\mathbb{R}}^{2|\widehat{\pi'(\mathcal{H}_{p})}}}\mathbf{h}_{p}f(\mathbf{h}_{p}|\mathcal{Y}_{1:p},\widehat{\pi(\mathcal{H}_{p})})d\mathbf{h}_{p}
+\end{cases}
+\end{equation}
+
+where
+
+\begin{equation}
+f(\pi(\mathcal{H}_{p})|\mathcal{Y}_{1:p})=\int_{\pi'(\mathcal{H}_{p})\times\pi''(\mathcal{H}_{p})}f(\mathcal{H}_{p}|\mathcal{Y}_{1:p})\delta\mathcal{H}_{p}
+\end{equation}
+
+\begin{equation}
+f(\pi'(\mathcal{H}_{p})|\mathcal{Y}_{1:p},\pi(\mathcal{H}_{p}))=\int_{\pi''(\mathcal{H}_{p})}f(\mathcal{H}_{p}|\mathcal{Y}_{1:p},\widehat{\pi(\mathcal{H}_{p})})\delta\mathcal{H}_{p}
+\end{equation}
+
+The operation performed in Eqs. (9) and (10) using the differential
+$\delta\mathcal{H}_{p}$ are set integrations in the sense specified
+in \cite{GOO97}.
+
+This estimator amounts to first estimating the SNR level at time $p$,
+then estimating the identities of the active paths at time $p$, and
+then estimating the gains for those active paths deemed active, while
+inactive paths will be estimated to have zero gain.
+
+The practical implementation of this structure is dependent on the
+specific problem. A generalized practical implementation is out of
+the scope of this paper, though it may be suggested that advanced
+estimation techniques, possibly involving particle filters and/or
+neural networks, could be used. In the balance of this paper, we will
+assume that the three steps are somewhat separable problems in nature:
+the first step will be considered to be solved with quasi-ideal SNR
+estimators/detectors (QISDs), eventually based on additional information (like track
+location and speed in HSR); the second step will be performed with
+the Simplified MAP (SMAP) algorithm proposed in \cite{MEN18}; and the third step
+will be performed in a Kalman filter (KF) bank. A simplified block diagram for this scheme is shown in Fig. 1.
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[scale=0.30]{Fig1-BlockDiagram.png}}
+\caption{Block diagram for the simulated channel estimation scheme.}
+\label{fig}
+\end{figure}
+
+\subsection{Quasi-Ideal SNR Estimators}
+In \cite{MEN18}, the Ideal Switching System (ISS) was defined as a system where ``death/birth detectors detect 100\% of births and 100\% of deaths, with no false birth/death detection''. It was argued that an x\%-degraded Ideal Switching System (IISx\%) could be easily defined as ``a switching system detecting x\% of births and x\% of deaths, with no false detection''. Such a degraded ideal system could also be called ``quasi-ideal''.
+
+This concept can be extended to SNR detection. Thus, considering two SNR levels (low, around $s$ dB; and high, around $s+\Delta s$ dB) we can define an Ideal SNR Detector (ISD) where SNR detectors detect 100\% of SNR updrifts (i.e. SNR drifting from low to high level) and 100\% of SNR downdrifts (i.e. SNR drifting from high to low level), with no false SNR drift detection. (When the probabilities of SNR updrift and SNR downdrift are symmetric, those probabilities will be denoted by $P_{switch}$.) It can similarly be argued that an x\% Quasi-Ideal SNR Detector (QISD-x\%) could be easily defined as a system detecting x\% of updrifts and x\% of deaths, with no false birth/death detection.
+
+Please note this concept can be trivially extended to $n>2$ SNR levels. If the SNR division is granular enough, they should properly be called ``Quasi-Ideal SNR Estimators'' (QISE).
+
+Morever, to study the QISE/QISD+SMAP+KF scheme introduced here, it is realistic to consider QISEs/QISDs whose detection is not instantaneous, but has a short delay (5-20 time instants).
+
+\section{Simplified MAP thresholds}
+As shown in Fig. 1, the QISD will feed the SNR level estimate into a Simplified Maximum a Posteriori (SMAP) death/birth detector. Such detector makes use of three detection heuristics\cite{MEN18}: a) memoryless detection of large leaps into a narrow, zero-centered range; b) memory detection of a sequence at a close range of zero; and c) birth detection.
+These heuristics are based on dynamical thresholds that can be fine-tuned through the help of a set of parameters: ${q_A, q_B, q_C}$. For example, the SMAP heuristic for large leaps into death (zero) leads to detecting ``death'' whenever
+\begin{equation}
+P_{death}\cdot f(u_{p}^{(l)}|l\,is\,dead)>f(u_{p}^{(l)}|l\,is\,alive)\cdot(1-P_{death})\label{eq:DeathDetector}
+\end{equation}
+where $u_{p}^{(l)}$ is the Least-Squares-estimated tap gain and the events ``$l$ is dead/alive'' mean that the $l$th path is dead/alive, respectively. Since this detector is comparing two scaled Gaussian pdfs, an equivalent expression to (\ref{eq:DeathDetector}) would be:
+\begin{equation}
+\begin{split}
+P_{death}\cdot\frac{1}{\sqrt{2\pi}\sigma_{v^{(l)}}^{2}}\cdotp e^{-\frac{(u_{p}^{(l)})^{2}}{2\sigma_{v^{(l)}}^{2}}}>\frac{1}{\sqrt{2\pi}\sigma_{A}^{2}}\cdotp e^{-\frac{(u_{p}^{(l)}-\hat{u}_{p}^{(l)}(-))^{2}}{2\sigma_{A}^{2}}}\cdot \\ \cdot(1-P_{death})
+\end{split}
+\end{equation}
+where
+\begin{equation}
+\sigma_A=q_A\cdot\sqrt{\sigma_{v^{(l)}}^{2}+(1-\lambda^2)\sigma_{h}^2}
+\end{equation}
+For more details, refer to \cite{MEN18}.
+
+\subsection{Practical optimization issues}
+SMAP parameters $\{q_{i}\}$ need to be optimized for each specific SNR level (or each specific set of SNR levels) to make full use of the SNR estimate provided by the QISD. Several optimization
+strategies were attempted: our experience suggests that the search
+space is dense with local minima (in the sense of local environments
+making gradient-descent algorithms stop). Thus, algorithms similar
+to gradient descent are unsuitable. Instead, we recommend the following
+optimization Search Steps (SS) for each SNR level: 
+\begin{itemize}
+\item SS1: ${q_{i}}$ values are randomly initialized following a normal distribution over the space where SMAP assumptions are mostly reasonable, then CTMSE for the SMAP+KF scheme is computed and the $N_{SS}$ best values are chosen. $N_{SS}$ is a parameter to be chosen taking the scope of the simulation (i.e. number of random initializations, parameter diversity) into account, e. g. $N_{SS}=4$ for 50,000 random initializations.
+\item SS2: ${q_{i}}$ values are randomly initialized following a normal distribution centered on the $N_{SS}$ best SS1 values, but with a fraction (e.g. a quarter) of the variance.
+\item SS3: values are randomly initialized following a normal distribution centered on the $N_{SS}$ best SS2 values, but variance will be a fraction of each central parameter, e.g. $\mathcal{N}([q_{A}$ $q_{B}$ $q_{C}];$
+{[}$0.1q_{A}$ $0.1q_{B}$ $0.1q_{C}${]}).
+\end{itemize}
+The aforementioned illustrative values for $N_{SS}$ and variances are heuristics backed by extensive simulations. Due to the random nature of the search, it may happen that the best parameters for an SNR level work better at a different SNR level than its own
+optimized parameter set does. To avoid this ``better-finder'' effect,
+a final step (SS4) can be added whereby each SNR level is tested with all optimal parameter sets, including those for other SNR levels.
+
+\section{Simulation results}
+The OFDM system under consideration has $N_p=5$ pilot subcarriers and $K=8$ pilot symbols per subcarrier. The average energy per pilot symbol, $\sigma_{s}^{2}$,
+is assumed to be uniform and the overall channel energy is normalized
+to one. A BPSK modulation is used. The channel is assumed to have
+a uniform multipath delay profile, multipath spread smaller than the
+guard time, and uncorrelated path gains. $10^6$
+OFDM symbols were transmitted through a channel with $L_{max}=5$
+and $P_{birth/death}=0.05$. Individual paths were assumed to have
+the same average energy $\sigma_{h}^{2}$ over long periods and $\lambda=0.999$.
+Channel SNR was assumed to experience a sudden switch (from a high
+SNR level into a low SNR level, or viceversa) with probability $P_{switch}=0.01$.
+Between high and low SNR, a difference $\Delta SNR=6$ dB was considered.
+
+Each tap is tracked with a combined scheme consisting of a SNR detector,
+a birth/death SMAP detector, and a KF. We consider the following QISD
+accuracies for the SNR detection step: 90, 95, 99 and 100\%, with
+a detection delay of 5, 8, 15 and 20 time instants, respectively.
+For comparison purposes, we also consider the ideal case of perfect,
+instantaneous SNR detection (ISD), as a lower bound.
+
+The tap birth/death detection is performed with the SMAP parameters
+optimized according to steps SS1-3, with 50,000 random initializations,
+$N_{SS}=4$ and 6,500 subsequent randomizations for each set. SS4
+was intentionally omitted to show the ``better-finder'' effect (see
+Subsection {\scshape iv.a}) in the results. The optimized parameter values for
+selected SNRs are shown in Table 1.
+
+\begin{table}
+\caption{Optimized SMAP parameter values for SNR=\{9,15\}.}
+\begin{centering}
+\begin{tabular}{|c|c|c|}
+\hline 
+Parameter & SNR = 9 dB & SNR = 15 dB\tabularnewline
+\hline 
+\hline 
+$q_{A}$ & 1.3543  & 0.8065\tabularnewline
+\hline 
+$q_{B}$ & 1.6103 & 1.3427\tabularnewline
+\hline 
+$q_{C}$ & 2.8823 & 3.1613\tabularnewline
+\hline 
+$\sigma_{A}$ & 0.1448  & 0.0533\tabularnewline
+\hline 
+\end{tabular}
+\par\end{centering}
+\end{table}
+
+Fig. 2 shows the performance of such combined QISD+SMAP+KF schemes
+for several SNR values. Please notice that each scheme was simulated
+in a bilevel SNR environment. All SNR values $<$ 15 were considered
+to be ``low'' and to switch to a 6dB-higher SNR with $P_{switch}$.
+
+Several conclusions are evident: KF with no birth/death detection
+performs catastrophically worse than any SMAP scheme. Even when no
+SNR detection is available (``No QISD''), the SMAP+KF performance
+is surprisingly robust to SNR drift; this is especially evident at
+SNR=13 dB, where the ``better-finder'' effect (see {\scshape iv.a}) takes place.
+While the effect of an accurate SNR detection is muted in the easier scenario (high SNR), channel tracking does benefits from it at low SNR (see ``No QISD'' has higher MSE at SNR={9,11} dB in Fig. 2). Consequently, after considering both the lapses of high and low SNR, overall CTMSE is reduced (up to 10\%, according to our results) when any of the QISD schemes are used.
+
+Figs. 3-4 explain why: differences in assumed noise (KF's prediction error variance) make birth/death detection fail when the ``baseline'' SNR estimate (provided by QISD) happens to be false (Fig. 4), generating a slow KF climb or descent (higher MSE). This is the same behaviour underlying KF's catastrophic performance in the face of abrupt tap gain changes (Fig. 3) when no SMAP is used.
+
+It is important to remark that all QISD schemes, no matter whether slow and highly accurate or fast and not so accurate, show a similar performance to each other and to the ideal, instantaneous case (ISD). This suggests there is a pronounced trade-off between SNR accuracy and detection delay that can be exploited during SNR detection design.
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[scale=0.62]{Fig6v4.png}}
+\caption{Channel Tracking Mean Squared Error vs. Signal-To-Noise Ratio (SNR) for different SNR and birth/death detection schemes.}
+\label{fig}
+\end{figure}
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[scale=0.62]{Fig2v1.png}}
+\caption{Kalman tracker with and without birth/death detector for SNR = 15 dB.}
+\label{fig}
+\end{figure}
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[scale=0.62]{Fig3v2.png}}
+\caption{Kalman tracker with birth/death detector when SNR detection is correct (9 dB) and incorrect (15 dB).}
+\label{fig}
+\end{figure}
+
+\section{Conclusions}
+A new RST framework for combined death/birth and SNR detection has
+been introduced. Some SMAP optimization issues were tackled. Simulation results compared different QISD+SMAP schemes and suggest
+that SMAP, while being surprisingly robust to SNR drift, benefits
+from an accurate SNR detection. The information contained herein may
+be extremely useful when designing SNR trackers with
+death/birth detectors for practical smart mobility applications.
+
+\section{Acknowledgement}
+This work has been partially supported by the Spanish National Project
+TERESA-ADA, under grant TEC2017-90093-C3-2-R, funded by
+(MINECO/AEI/FEDER, UE).
+
+\begin{thebibliography}{1}
+
+\bibitem{GUO17}W. Guo, W. Zhang and M. Pengcheng, ``High-Mobility OFDM Downlink Transmission With Large-Scale Antenna Array'', \textit{IEEE
+Trans. on Veh. Tech.}, vol. 66, no. 9, pp. 8600-8604, September 2017.
+
+\bibitem{SHE17}Z. Sheng, H. D. Tuan, H. H. Nguyen and Y. Fang, ``Pilot Optimization for Estimation of High-Mobility OFDM Channels'', \textit{IEEE Trans. on Veh. Tech.}, vol. 66, no. 10, pp. 8795-8806, October 2017.
+
+\bibitem{TSE05}D. Tse and P. Viswanath, \textit{Fundamentals of Wireless Communication}, Cambridge, UK: Cambridge University Press, 2005. 
+
+\bibitem{DAH18}5G NR: The Next Generation Wireless Access Technology. Editors: E. Dahlman, S. Parkvall, and J. Sköld, London (UK): Academic Press, 2018.
+
+\bibitem{GRE01}M. S. Grewal and P. A. Angus, \textit{Kalman Filtering: Theory
+and Practice using MATLAB}, New York, NY, USA: Wiley, 2001. 
+
+\bibitem{HE16}R. He, B. Ai, W. Gongpu, G. Ke, Z. Zhangdui, A. F. Molisch, C. Briso-Rodriguez and C. Oestgest, ``High-Speed Railway Communications. From GSM-R to LTE-R.'', \textit{IEEE Vehicular Technology Magazine}, pp. 49-58, September 2016.
+
+\bibitem{CHE15}B. Chen, Zh. Zhong, B. Ai, K. Guan, R. He and D. G. Michelson, ``Channel Characteristics in High-Speed Railway. A Survey of Channel Propagation Properties'', \textit{IEEE Vehicular Technology Magazine}, pp. 67-78, June 2015.
+
+\bibitem{MAT15}D. W. Matolak and R. Sun, ``Unmanned Aircraft Systems. Air-Ground Channel Characterization for Future Applications'', \textit{IEEE Vehicular Technology Magazine}, pp. 79-85, June 2015.
+
+\bibitem{MAT16}D. W. Matolak and R. Sun, ``Air-Ground Channel Characterization for Unmanned Aircraft Systems Part II: Hilly and Mountainous Settings'', \textit{IEEE Trans. on Veh. Tech.}, pp. 1913-1925, June 2016.
+
+\bibitem{MAH17}K. Mahler, W. Keusgen, F. Tufvesson, T. Zemen and G. Caire, ``Measurement-Based Wideband Analysis of Dynamic
+Multipath Propagation in Vehicular
+Communication Scenarios'', \textit{IEEE Trans. on Veh. Tech.}, vol. 66, no. 6, pp. 4657-4667, June 2017.
+
+\bibitem{ANG07}D. Angelosante, E. Biglieri and M. Lops, \textquotedblleft Multipath
+Channel Tracking in OFDM systems\textquotedblright ,
+\textit{Proc. 2007 18th Int'l Symp. on Pers., Ind. and Mob. Radio Comms. (PIMRC)}, Athens, Greece, Sept. 2007, pp. 1-5.
+
+\bibitem{ANG09}D. Angelosante, E. Biglieri and M. Lops, \textquotedblleft Sequential
+Estimation of Multipath MIMO-OFDM Channels\textquotedblright , \textit{IEEE
+Trans. Signal Processing}, vol. 57, no. 8, pp. 3167-3181, March 2009.
+
+\bibitem{MEN18}D. M\'endez-Romero, M. J. Fern\'andez-Getino Garc\'ia, ``Simpler Multipath Detection for Vehicular OFDM Channel Tracking'', \textit{IEEE Trans. Veh. Technol.}, vol. 67, no. 11, pp. 10752-10759, November 2018.
+
+\bibitem{GOO97}I. R. Goodman, R. P. S. Mahler and H. T. Nguyen, \textit{Mathematics of Data Fusion}, Dordrecht, The Netherlands: Kluwer Academic Publishers, 1997. 
+\end{thebibliography}
+
+\end{document}
