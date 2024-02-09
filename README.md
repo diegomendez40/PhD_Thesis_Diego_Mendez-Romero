@@ -15,11 +15,20 @@ This repository will include the original and expanded versions of code and publ
 Méndez-Romero, D. and Fernández-Getino García, M. J. (2018). Simpler Multipath Detection for Vehicular OFDM Channel Tracking. IEEE Transactions on Vehicular Technology,
 67(11):10752-10759. DOI: 10.1109/TVT.2018.2868445
 
-Results: A computationally inexpensive, threshold-based abrupt-change detector called Simplified Maximum A Posteriori (SMAP) is presented. Simulations show this estimator greatly reduces channel tracking error in the target SNR range at a very small computational cost, thus outperforming previously known systems.
+**Results**: A computationally inexpensive, threshold-based abrupt-change detector called Simplified Maximum A Posteriori (SMAP) is presented. Simulations show this estimator greatly reduces channel tracking error in the target SNR range at a very small computational cost, thus outperforming previously known systems.
 
 ### Paper 02 - Vehicular Kalman trackers
 
 Méndez-Romero, D. and Fernández-Getino García, M. J. (2020). Death/Birth and SNR Detection for Vehicular Kalman Channel Trackers. In 2020 IEEE 20th Mediterranean Electrotechnical Conference (MELECON) [16-18 June 2020], pages 104-108, Palermo, Italy. IEEE. DOI: 10.1109/MELECON48756.2020.9140497
 
-Results: This paper considers combined death/birth and SNR detection when SNR is dynamical and may drift. Simulation results compared different schemes combining SNR detection and SMAP and suggest that SMAP, while being robust to SNR drift, benefits from an accurate SNR detection.
+**Results**: This paper considers combined death/birth and SNR detection when SNR is dynamical and may drift. Simulation results compared different schemes combining SNR detection and SMAP and suggest that SMAP, while being robust to SNR drift, benefits from an accurate SNR detection.
+
+### Paper 03 - Neural-Network-Switched Kalman Filters
+
+Méndez-Romero, D., Fernández-Getino Garcia, M. J., Tonello, A. M., and Dobre, O. A. (2020). Neural-Network-Switched Kalman Filters as Novel Trackers for Multipath Channels. In 2020 IEEE International Conference on Communications Workshops (ICC Workshops) [7-11 June 2020], pages 1-5, Dublin, Ireland. IEEE.
+DOI: 10.1109/ICCWorkshops49005.2020.9145198
+
+**Results**: Neural-Network-Switched Kalman Filters (NNKFs) are proposed as novel trackers for multipath channels. The core idea is similar to the SMAP switch in Paper 01, but now the tap birth/death detection will be performed via an artificial neuronal network (NNs).
+
+The proposed Neural-Kalman scheme is robust to wide variations in the probabilities of tap birth and death. Such robustness suggests a single, low-complexity NNKF could be reusable over different tap indices and communication environments.
 
