@@ -4,7 +4,7 @@
 
 ## Getting Started
 
-For an explanation of Neural-Kalman schemes, see the main pdf, PhD_Thesis_Diego_Méndez_Romero_v1.pdf, and the accompanying viva slides, "Neural-Kalman Schemes for Channel Tracking and Learning_v0.074.pptx", or watch "Video explanation for NNFK (IEEE presentation).mp4".
+For an explanation of Neural-Kalman schemes, see the main pdf, `PhD_Thesis_Diego_Méndez_Romero_v1.pdf`, and the accompanying viva slides, `Neural-Kalman Schemes for Channel Tracking and Learning_v0.074.pptx`, or watch `Video explanation for NNFK (IEEE presentation).mp4`.
 
 ## Repository Structure
 
@@ -31,4 +31,10 @@ DOI: 10.1109/ICCWorkshops49005.2020.9145198
 **Results**: Neural-Network-Switched Kalman Filters (NNKFs) are proposed as novel trackers for multipath channels. The core idea is similar to the SMAP switch in Paper 01, but now the tap birth/death detection will be performed via an artificial neuronal network (NNs).
 
 The proposed Neural-Kalman scheme is robust to wide variations in the probabilities of tap birth and death. Such robustness suggests a single, low-complexity NNKF could be reusable over different tap indices and communication environments.
+
+## Visual Summary
+
+My research, visually summarized in a single image:
+
+![Why Neural-Network-switched Kalman filters are better](assets/Infograf%C3%ADa%20NNKF.jpg)
 
