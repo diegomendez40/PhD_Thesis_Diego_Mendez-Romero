@@ -1,6 +1,8 @@
 # PhD Thesis on Neural-Kalman Schemes
 
-"Neural-Kalman Schemes for Non-Stationary Channel Tracking and Learning" - A dissertation submitted by Diego Méndez Romero in partial fulfillment of the requirements for the degree of Doctor of Philosophy in Multimedia and Communications, Universidad Carlos III de Madrid - Advisor/Tutor: M. Julia Fernández-Getino García - Leganés, February 2023
+Neural-Kalman Schemes -- a new AI scheme enhancing wireless communications
+
+This repo contains my whole Thesis and will eventually contain all my expanded research and code and how these novel Neural-Kalman Schemes can revolutionize abrupt change detection not just in wireless communications, but also e.g. **in finance** (see Chapter 9 for financial applications!). Yes, I am saying *you can detect any new global trends earlier* -- close to immediately -- with these techniques and I intend to prove it.
 
 ## Getting Started
 
