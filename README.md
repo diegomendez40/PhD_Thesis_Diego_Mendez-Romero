@@ -4,7 +4,7 @@ Neural-Kalman Schemes -- a new AI scheme enhancing wireless communications!
 
 These novel Neural-Kalman Schemes can revolutionize abrupt change detection.
 
-Not just in wireless communications, but also e.g. **in finance** (see Chapter 9 for financial applications!). *You can detect any new global trends earlier* -- close to immediately -- with these techniques and ![I intend to prove it](https://github.com/diegomendez40/GlobalAbruptChangeDetection).
+Not just in wireless communications, but also e.g. **in finance** (see Chapter 9 for financial applications!). *You can detect any new global trends earlier* -- close to immediately -- with these techniques and [I intend to prove it](https://github.com/diegomendez40/GlobalAbruptChangeDetection).
 
 ## Getting Started
 
